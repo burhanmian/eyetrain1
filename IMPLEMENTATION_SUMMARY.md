@@ -209,7 +209,7 @@ eyetrain1/
 ### Backend (5 packages)
 - express: ^4.18.2
 - cors: ^2.8.5
-- multer: ^1.4.5-lts.1
+- multer: ^2.0.2 (patched - fixes DoS vulnerabilities)
 - uuid: ^9.0.0
 - dotenv: ^16.3.1
 

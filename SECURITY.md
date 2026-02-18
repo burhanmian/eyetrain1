@@ -35,9 +35,10 @@ app.use('/api/upload-*', requireAuth);
 ```
 
 ### 3. File Upload Security (Priority: MEDIUM)
-**Status:** Basic validation only
-**Risk:** Malicious files could be uploaded
+**Status:** Patched - Updated to multer 2.0.2
+**Previous Risk:** DoS vulnerabilities from malformed requests, memory leaks
 **Current Mitigation:**
+- ✅ Updated to multer 2.0.2 (fixes CVE vulnerabilities)
 - File size limits (50MB)
 - File type validation (extension-based)
 
