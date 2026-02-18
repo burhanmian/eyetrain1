@@ -12,7 +12,9 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+
+// Serve static files from React build
+app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
 
 // Ensure directories exist
 const uploadDir = path.join(__dirname, '..', 'uploads');
@@ -379,6 +381,11 @@ function simulateMotionApplication(motionId, modelId) {
     }
   }, 1500);
 }
+
+// Serve React app for all other routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'client', 'build', 'index.html'));
+});
 
 // Start server
 app.listen(PORT, () => {

@@ -10,6 +10,27 @@ function MotionUpload({ models, apiBase }) {
 
   const riggedModels = models.filter(m => m.isRigged);
 
+  const pollMotionStatus = useCallback(async (id) => {
+    const interval = setInterval(async () => {
+      try {
+        const response = await axios.get(`${apiBase}/motion/${id}`);
+        const motion = response.data;
+
+        if (motion.status === 'completed') {
+          clearInterval(interval);
+          setProcessing(false);
+          setResult(motion);
+        } else if (motion.status === 'failed') {
+          clearInterval(interval);
+          setProcessing(false);
+          alert(motion.error || 'Motion application failed');
+        }
+      } catch (error) {
+        console.error('Error polling motion status:', error);
+      }
+    }, 1000);
+  }, [apiBase]);
+
   const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length === 0 || !selectedModel) return;
 
@@ -35,28 +56,7 @@ function MotionUpload({ models, apiBase }) {
       alert('Error uploading motion: ' + error.message);
       setUploading(false);
     }
-  }, [apiBase, selectedModel]);
-
-  const pollMotionStatus = async (id) => {
-    const interval = setInterval(async () => {
-      try {
-        const response = await axios.get(`${apiBase}/motion/${id}`);
-        const motion = response.data;
-
-        if (motion.status === 'completed') {
-          clearInterval(interval);
-          setProcessing(false);
-          setResult(motion);
-        } else if (motion.status === 'failed') {
-          clearInterval(interval);
-          setProcessing(false);
-          alert(motion.error || 'Motion application failed');
-        }
-      } catch (error) {
-        console.error('Error polling motion status:', error);
-      }
-    }, 1000);
-  };
+  }, [apiBase, selectedModel, pollMotionStatus]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

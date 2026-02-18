@@ -14,7 +14,6 @@ function App() {
   const [activeTab, setActiveTab] = useState('photo');
   const [models, setModels] = useState([]);
   const [defaultModels, setDefaultModels] = useState([]);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchModels();

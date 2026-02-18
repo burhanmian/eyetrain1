@@ -6,38 +6,9 @@ function PhotoUpload({ onConverted, apiBase }) {
   const [uploading, setUploading] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [jobId, setJobId] = useState(null);
   const [result, setResult] = useState(null);
 
-  const onDrop = useCallback(async (acceptedFiles) => {
-    if (acceptedFiles.length === 0) return;
-
-    const file = acceptedFiles[0];
-    const formData = new FormData();
-    formData.append('photo', file);
-
-    setUploading(true);
-    setProgress(0);
-
-    try {
-      const response = await axios.post(`${apiBase}/upload-photo`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-
-      setJobId(response.data.jobId);
-      setUploading(false);
-      setProcessing(true);
-
-      // Poll for job status
-      pollJobStatus(response.data.jobId);
-    } catch (error) {
-      console.error('Upload error:', error);
-      alert('Error uploading photo: ' + error.message);
-      setUploading(false);
-    }
-  }, [apiBase]);
-
-  const pollJobStatus = async (id) => {
+  const pollJobStatus = useCallback(async (id) => {
     const interval = setInterval(async () => {
       try {
         const response = await axios.get(`${apiBase}/job/${id}`);
@@ -59,7 +30,34 @@ function PhotoUpload({ onConverted, apiBase }) {
         console.error('Error polling job status:', error);
       }
     }, 1000);
-  };
+  }, [apiBase, onConverted]);
+
+  const onDrop = useCallback(async (acceptedFiles) => {
+    if (acceptedFiles.length === 0) return;
+
+    const file = acceptedFiles[0];
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    setUploading(true);
+    setProgress(0);
+
+    try {
+      const response = await axios.post(`${apiBase}/upload-photo`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      setUploading(false);
+      setProcessing(true);
+
+      // Poll for job status
+      pollJobStatus(response.data.jobId);
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Error uploading photo: ' + error.message);
+      setUploading(false);
+    }
+  }, [apiBase, pollJobStatus]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -74,7 +72,6 @@ function PhotoUpload({ onConverted, apiBase }) {
     setUploading(false);
     setProcessing(false);
     setProgress(0);
-    setJobId(null);
     setResult(null);
   };
 

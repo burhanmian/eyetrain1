@@ -5,37 +5,9 @@ import axios from 'axios';
 function ModelUpload({ onUploaded, apiBase }) {
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
-  const [modelId, setModelId] = useState(null);
   const [result, setResult] = useState(null);
 
-  const onDrop = useCallback(async (acceptedFiles) => {
-    if (acceptedFiles.length === 0) return;
-
-    const file = acceptedFiles[0];
-    const formData = new FormData();
-    formData.append('model', file);
-
-    setUploading(true);
-
-    try {
-      const response = await axios.post(`${apiBase}/upload-model`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-
-      setModelId(response.data.modelId);
-      setUploading(false);
-      setAnalyzing(true);
-
-      // Poll for model status
-      pollModelStatus(response.data.modelId);
-    } catch (error) {
-      console.error('Upload error:', error);
-      alert('Error uploading model: ' + error.message);
-      setUploading(false);
-    }
-  }, [apiBase]);
-
-  const pollModelStatus = async (id) => {
+  const pollModelStatus = useCallback(async (id) => {
     const interval = setInterval(async () => {
       try {
         const response = await axios.get(`${apiBase}/model/${id}`);
@@ -55,7 +27,33 @@ function ModelUpload({ onUploaded, apiBase }) {
         console.error('Error polling model status:', error);
       }
     }, 1000);
-  };
+  }, [apiBase, onUploaded]);
+
+  const onDrop = useCallback(async (acceptedFiles) => {
+    if (acceptedFiles.length === 0) return;
+
+    const file = acceptedFiles[0];
+    const formData = new FormData();
+    formData.append('model', file);
+
+    setUploading(true);
+
+    try {
+      const response = await axios.post(`${apiBase}/upload-model`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      setUploading(false);
+      setAnalyzing(true);
+
+      // Poll for model status
+      pollModelStatus(response.data.modelId);
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Error uploading model: ' + error.message);
+      setUploading(false);
+    }
+  }, [apiBase, pollModelStatus]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -69,7 +67,6 @@ function ModelUpload({ onUploaded, apiBase }) {
   const reset = () => {
     setUploading(false);
     setAnalyzing(false);
-    setModelId(null);
     setResult(null);
   };
 
