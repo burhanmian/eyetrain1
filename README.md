@@ -208,12 +208,45 @@ eyetrain1/
 - **React Dropzone** - File upload interface
 - **Three.js** - 3D rendering (via @react-three/fiber)
 
-## 🔮 Future Enhancements
+## 🔮 Future Enhancements & Development
 
+The platform is designed for easy extension. **Comprehensive guides available:**
+
+### 📚 Development Documentation
+- **[ENHANCEMENTS.md](ENHANCEMENTS.md)** - 30+ Feature Ideas with Implementation Guides
+  - Quick wins (easy to implement)
+  - AI & ML features
+  - 3D viewer enhancements
+  - Advanced rigging tools
+  - Motion capture improvements
+  - Cloud & storage integrations
+  - User management & collaboration
+  - Professional tools
+
+- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Complete Developer Guide
+  - Setup instructions
+  - Project structure explained
+  - Step-by-step tutorials
+  - Common development tasks
+
+- **[ROADMAP.md](ROADMAP.md)** - Development Timeline
+  - Version 1.1: Foundation enhancements
+  - Version 1.2: AI integration
+  - Version 1.3: Advanced 3D features
+  - Version 1.4: Motion capture enhancement
+  - Version 2.0: Enterprise edition
+
+- **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Quick Developer Reference
+  - Common commands
+  - Code patterns
+  - Debugging tips
+  - Best practices
+
+### 🎯 Planned Core Features
 - [ ] Real AI-powered photo-to-3D conversion
 - [ ] Advanced rigging algorithms
 - [ ] Real-time 3D preview with Three.js
-- [ ] Cloud storage integration
+- [ ] Cloud storage integration (S3, GCS, Azure)
 - [ ] User authentication and accounts
 - [ ] Collaborative features
 - [ ] Animation timeline editor
@@ -222,9 +255,29 @@ eyetrain1/
 - [ ] Batch processing
 - [ ] Plugin system for custom exporters
 
+**Want to contribute?** Start with [GETTING_STARTED.md](GETTING_STARTED.md) and pick a feature from [ENHANCEMENTS.md](ENHANCEMENTS.md)!
+
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please see:
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
+- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Development setup
+- **[ENHANCEMENTS.md](ENHANCEMENTS.md)** - Feature ideas to implement
+
+## 📚 Complete Documentation
+
+All documentation files:
+- **[README.md](README.md)** - Main documentation (this file)
+- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Developer onboarding guide
+- **[ENHANCEMENTS.md](ENHANCEMENTS.md)** - 30+ enhancement ideas
+- **[ROADMAP.md](ROADMAP.md)** - Development timeline and planning
+- **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Quick reference for developers
+- **[API.md](API.md)** - Complete API reference
+- **[USER_GUIDE.md](USER_GUIDE.md)** - User tutorials and guides
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Deployment instructions
+- **[SECURITY.md](SECURITY.md)** - Security considerations
+- **[TESTING.md](TESTING.md)** - Testing strategy
+- **[STATUS.md](STATUS.md)** - Current status and verification
 
 ## 📄 License
 
