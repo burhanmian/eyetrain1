@@ -1,0 +1,76 @@
+name: Build Windows Installer
+
+on:
+  push:
+    branches:
+      - claude/motion-capture-software-6wgDm
+      - main
+      - master
+  workflow_dispatch:        # allow manual trigger from GitHub UI
+
+jobs:
+  build-windows:
+    name: Windows NSIS Installer + Portable EXE
+    runs-on: windows-latest
+
+    steps:
+      # ── 1. Checkout ────────────────────────────────────────────────────
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── 2. Node.js ────────────────────────────────────────────────────
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ── 3. Install dependencies ────────────────────────────────────────
+      - name: Install server dependencies
+        run: npm install
+
+      - name: Install client dependencies
+        working-directory: client
+        run: npm install
+
+      # ── 4. Generate icon ───────────────────────────────────────────────
+      - name: Generate PNG icon
+        run: node scripts/generate-icon.js
+
+      # ── 5. Build React client ─────────────────────────────────────────
+      - name: Build React frontend
+        working-directory: client
+        run: npm run build
+        env:
+          CI: false            # treat warnings as warnings, not errors
+
+      # ── 6. Package with electron-builder ──────────────────────────────
+      - name: Build Windows installer & portable EXE
+        run: npx electron-builder --win --publish never
+        env:
+          # Prevents electron-builder from trying GitHub releases
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 7. Upload artifacts ────────────────────────────────────────────
+      - name: Upload NSIS installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoCap-Studio-Windows-Setup
+          path: dist/*Setup*.exe
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload portable EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoCap-Studio-Windows-Portable
+          path: dist/*portable*.exe
+          retention-days: 30
+          if-no-files-found: warn
+
+      # ── 8. Print artifact summary ──────────────────────────────────────
+      - name: List build output
+        run: |
+          echo "=== Build output ==="
+          dir dist
+        shell: cmd

@@ -8,17 +8,19 @@
   "license": "MIT",
 
   "scripts": {
-    "dev":          "concurrently \"npm run server\" \"npm run client\"",
-    "server":       "nodemon server/index.js",
-    "client":       "cd client && npm start",
-    "build":        "cd client && npm run build",
-    "start":        "node server/index.js",
-    "install-all":  "npm install && cd client && npm install",
+    "dev":           "concurrently \"npm run server\" \"npm run client\"",
+    "server":        "nodemon server/index.js",
+    "client":        "cd client && npm start",
+    "build":         "cd client && npm run build",
+    "start":         "node server/index.js",
+    "install-all":   "npm install && cd client && npm install",
+    "generate-icon": "node scripts/generate-icon.js",
 
-    "electron:dev":  "npm run build && electron .",
-    "electron:pack": "npm run build && electron-builder --dir",
-    "electron:dist": "npm run build && electron-builder",
-    "electron:win":  "npm run build && electron-builder --win"
+    "electron:dev":  "npm run generate-icon && npm run build && electron .",
+    "electron:win":  "npm run generate-icon && npm run build && electron-builder --win --publish never",
+    "electron:linux":"npm run generate-icon && npm run build && electron-builder --linux --publish never",
+    "electron:mac":  "npm run generate-icon && npm run build && electron-builder --mac --publish never",
+    "electron:all":  "npm run generate-icon && npm run build && electron-builder -mwl --publish never"
   },
 
   "dependencies": {
@@ -32,32 +34,34 @@
 
   "devDependencies": {
     "concurrently":    "^8.2.1",
-    "nodemon":         "^3.0.1",
     "electron":        "^28.1.0",
-    "electron-builder": "^24.9.1"
+    "electron-builder":"^24.9.1",
+    "nodemon":         "^3.0.1"
   },
 
   "build": {
-    "appId":       "com.mocapstudio.app",
-    "productName": "MoCap Studio",
-    "copyright":   "Copyright © 2025 MoCap Studio",
+    "appId":        "com.mocapstudio.app",
+    "productName":  "MoCap Studio",
+    "copyright":    "Copyright © 2025 MoCap Studio",
+    "asar":         false,
 
     "files": [
       "electron/**/*",
+      "server/**/*",
       "client/build/**/*",
-      "node_modules/**/*"
+      "node_modules/**/*",
+      "!node_modules/.bin",
+      "!node_modules/electron",
+      "!node_modules/electron-builder",
+      "!node_modules/concurrently",
+      "!node_modules/nodemon",
+      "!**/node_modules/*/test/**",
+      "!**/node_modules/*/.git/**",
+      "!**/node_modules/*.md"
     ],
 
     "extraResources": [
-      {
-        "from": "server",
-        "to":   "server",
-        "filter": ["**/*", "!node_modules"]
-      },
-      {
-        "from": "bridge",
-        "to":   "bridge"
-      }
+      { "from": "bridge", "to": "bridge" }
     ],
 
     "directories": {
@@ -70,19 +74,18 @@
         { "target": "nsis",     "arch": ["x64"] },
         { "target": "portable", "arch": ["x64"] }
       ],
-      "icon":            "electron/icon.png",
+      "icon": "electron/icon.png",
       "requestedExecutionLevel": "asInvoker"
     },
 
     "nsis": {
-      "oneClick":           false,
+      "oneClick":                        false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon":      "electron/icon.png",
-      "uninstallerIcon":    "electron/icon.png",
-      "installerHeaderIcon":"electron/icon.png",
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName":       "MoCap Studio"
+      "createDesktopShortcut":           true,
+      "createStartMenuShortcut":         true,
+      "shortcutName":                    "MoCap Studio",
+      "installerIcon":                   "electron/icon.png",
+      "uninstallerIcon":                 "electron/icon.png"
     },
 
     "mac": {
@@ -92,8 +95,9 @@
     },
 
     "linux": {
-      "icon":   "electron/icon.png",
-      "target": [{ "target": "AppImage", "arch": ["x64"] }]
+      "icon":       "electron/icon.png",
+      "category":   "Video",
+      "target":     [{ "target": "AppImage", "arch": ["x64"] }]
     }
   }
 }

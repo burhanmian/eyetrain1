@@ -1,84 +1,87 @@
 'use strict';
 /**
- * Electron main process for MoCap Studio
+ * Electron main process – MoCap Studio
  *
- * Starts the embedded Express + WebSocket server, then opens a
- * BrowserWindow.  The app works entirely offline – no internet
- * required except for the MediaPipe CDN wasm files on first run
- * (they are cached by the browser afterwards).
+ * Embeds the Express + WebSocket server, then opens a BrowserWindow.
+ * Works offline after the first MediaPipe CDN download (wasm files
+ * are cached by Chromium automatically).
  *
- * Packaging produces a Windows NSIS installer and a portable .exe
- * via electron-builder.
+ * Packaging strategy
+ * ------------------
+ * electron-builder uses asar:false so all files sit on disk, which means:
+ *  - server/index.js can require() its dependencies normally
+ *  - express.static / res.sendFile work without asar path issues
+ *  - Python bridge is in resources/bridge/ (accessible from filesystem)
+ *
+ * Path layout (packaged, Windows)
+ * --------------------------------
+ * MoCap Studio/
+ *   MoCap Studio.exe
+ *   resources/
+ *     app/
+ *       electron/main.js   ← __dirname
+ *       server/index.js
+ *       client/build/
+ *       node_modules/
+ *     bridge/              ← Kinect Python bridge (extraResources)
  */
 
-const { app, BrowserWindow, shell, Menu, ipcMain } = require('electron');
-const path  = require('path');
-const http  = require('http');
-const isDev = !app.isPackaged;
+const { app, BrowserWindow, shell, Menu, ipcMain, dialog, session } = require('electron');
+const path = require('path');
+const http = require('http');
 
-// ── Find the server entry point ───────────────────────────────────────────
-// In development: <repo>/server/index.js
-// In production:  resources/server/index.js  (copied by electron-builder)
-const serverEntry = isDev
-  ? path.join(__dirname, '..', 'server', 'index.js')
-  : path.join(process.resourcesPath, 'server', 'index.js');
+const IS_DEV      = !app.isPackaged;
+const SERVER_PORT = Number(process.env.PORT    || 5000);
+const WS_PORT     = Number(process.env.WS_PORT || 5001);
 
-const SERVER_PORT = 5000;
-const WS_PORT     = 5001;
+// ── Resolve paths that differ between dev and packaged ────────────────────
+//
+// In dev:      __dirname = <repo>/electron/
+// In packaged: __dirname = resources/app/electron/
+//
+// Either way, ../server/index.js is the server entry point.
+const SERVER_ENTRY = path.join(__dirname, '..', 'server', 'index.js');
+
+// Recordings go to the OS user-data folder (persists across updates)
+process.env.RECORDINGS_DIR = path.join(app.getPath('userData'), 'recordings');
+process.env.PORT            = String(SERVER_PORT);
+process.env.WS_PORT         = String(WS_PORT);
 
 let mainWindow = null;
-let serverReady = false;
 
 // ── Start embedded server ─────────────────────────────────────────────────
 function startServer() {
+  try {
+    require(SERVER_ENTRY);
+    return Promise.resolve();
+  } catch (err) {
+    return Promise.reject(err);
+  }
+}
+
+// ── Poll until the server responds on /api/health ────────────────────────
+function waitForServer(tries = 25, delay = 300) {
   return new Promise((resolve, reject) => {
-    try {
-      // Set env vars before requiring the server
-      process.env.PORT    = String(SERVER_PORT);
-      process.env.WS_PORT = String(WS_PORT);
-
-      // Recordings go to the user's AppData/Roaming/MoCapStudio folder
-      const recordingsDir = path.join(app.getPath('userData'), 'recordings');
-      process.env.RECORDINGS_DIR = recordingsDir;
-
-      require(serverEntry);
-      serverReady = true;
-      resolve();
-    } catch (err) {
-      reject(err);
-    }
+    const attempt = (n) => {
+      http.get(`http://localhost:${SERVER_PORT}/api/health`, (res) => {
+        res.statusCode === 200 ? resolve() : retry(n);
+      }).on('error', () => retry(n));
+    };
+    const retry = (n) => {
+      if (n <= 0) return reject(new Error('Server did not start in time'));
+      setTimeout(() => attempt(n - 1), delay);
+    };
+    attempt(tries);
   });
 }
 
-// ── Wait until the local server responds ─────────────────────────────────
-function waitForServer(retries = 20) {
-  return new Promise((resolve, reject) => {
-    const attempt = (remaining) => {
-      http.get(`http://localhost:${SERVER_PORT}/api/health`, res => {
-        if (res.statusCode === 200) {
-          resolve();
-        } else {
-          retry(remaining);
-        }
-      }).on('error', () => retry(remaining));
-    };
-
-    const retry = (remaining) => {
-      if (remaining <= 0) return reject(new Error('Server did not start'));
-      setTimeout(() => attempt(remaining - 1), 400);
-    };
-
-    attempt(retries);
-  });
-}
-
-// ── Create browser window ─────────────────────────────────────────────────
+// ── Create main window ───────────────────────────────────────────────────
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width:           1280,
-    height:          820,
+    width:           1300,
+    height:          840,
     minWidth:        900,
-    minHeight:       600,
+    minHeight:       620,
     title:           'MoCap Studio',
     backgroundColor: '#080818',
     icon:            path.join(__dirname, 'icon.png'),
@@ -86,20 +89,22 @@ function createWindow() {
       preload:          path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration:  false,
-      // Allow camera access (webcam)
-      webSecurity:      false
-    }
+      webSecurity:      false    // needed so localhost API calls work without CORS issues
+    },
+    show: false   // show once ready to avoid white flash
   });
+
+  mainWindow.once('ready-to-show', () => mainWindow.show());
 
   mainWindow.loadURL(`http://localhost:${SERVER_PORT}`);
 
-  // Open external links in the system browser instead of Electron
+  // Open all external links in the system browser
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: 'deny' };
   });
 
-  if (isDev) {
+  if (IS_DEV) {
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   }
 
@@ -110,17 +115,21 @@ function createWindow() {
 function buildMenu() {
   const template = [
     {
-      label: 'MoCap Studio',
+      label: 'File',
       submenu: [
-        { label: 'About MoCap Studio', role: 'about' },
+        {
+          label: 'Open Recordings Folder',
+          click: () => shell.openPath(process.env.RECORDINGS_DIR)
+        },
         { type: 'separator' },
-        { label: 'Quit', accelerator: 'CmdOrCtrl+Q', role: 'quit' }
+        { role: 'quit', label: 'Exit' }
       ]
     },
     {
       label: 'Edit',
       submenu: [
-        { role: 'undo' }, { role: 'redo' }, { type: 'separator' },
+        { role: 'undo' }, { role: 'redo' },
+        { type: 'separator' },
         { role: 'cut' }, { role: 'copy' }, { role: 'paste' }
       ]
     },
@@ -128,28 +137,44 @@ function buildMenu() {
       label: 'View',
       submenu: [
         { role: 'reload' },
-        { role: 'forceReload' },
         { type: 'separator' },
-        { role: 'resetZoom' },
-        { role: 'zoomIn' },
-        { role: 'zoomOut' },
+        { role: 'resetZoom' }, { role: 'zoomIn' }, { role: 'zoomOut' },
         { type: 'separator' },
-        { role: 'togglefullscreen' }
+        { role: 'togglefullscreen' },
+        ...(IS_DEV ? [{ type: 'separator' }, { role: 'toggleDevTools' }] : [])
       ]
     },
     {
-      label: 'Capture Device',
+      label: 'Capture',
       submenu: [
-        {
-          label: 'Open Kinect Bridge Guide',
-          click: () => {
-            shell.openExternal('https://github.com/burhanmian/eyetrain1#kinect-setup-windows-only');
-          }
-        },
+        { label: `API Server:  http://localhost:${SERVER_PORT}`, enabled: false },
+        { label: `WebSocket:   ws://localhost:${WS_PORT}`,       enabled: false },
         { type: 'separator' },
         {
-          label: `WebSocket Server: ws://localhost:${WS_PORT}`,
-          enabled: false
+          label: 'Open Kinect Bridge Guide',
+          click: () => shell.openExternal(
+            'https://github.com/burhanmian/eyetrain1#kinect-setup-windows-only'
+          )
+        }
+      ]
+    },
+    {
+      label: 'Help',
+      submenu: [
+        {
+          label: 'About MoCap Studio',
+          click: () => {
+            dialog.showMessageBox(mainWindow, {
+              title:   'About MoCap Studio',
+              message: `MoCap Studio v${app.getVersion()}`,
+              detail:
+                'Motion capture from Webcam, Kinect v1, and Kinect v2.\n\n' +
+                'Powered by MediaPipe Pose, Three.js, and Electron.\n\n' +
+                `Server: http://localhost:${SERVER_PORT}\n` +
+                `WebSocket: ws://localhost:${WS_PORT}`,
+              icon: path.join(__dirname, 'icon.png')
+            });
+          }
         }
       ]
     }
@@ -158,29 +183,31 @@ function buildMenu() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
-// ── IPC handlers ──────────────────────────────────────────────────────────
+// ── IPC ───────────────────────────────────────────────────────────────────
 ipcMain.handle('get-app-info', () => ({
-  version:      app.getVersion(),
-  userData:     app.getPath('userData'),
-  serverPort:   SERVER_PORT,
-  wsPort:       WS_PORT,
-  isDev
+  version:    app.getVersion(),
+  userData:   app.getPath('userData'),
+  serverPort: SERVER_PORT,
+  wsPort:     WS_PORT,
+  isDev:      IS_DEV
 }));
 
-// ── Electron lifecycle ─────────────────────────────────────────────────────
+// ── Electron lifecycle ────────────────────────────────────────────────────
 app.whenReady().then(async () => {
+  // Grant camera/mic permissions automatically (needed for webcam capture)
+  session.defaultSession.setPermissionRequestHandler((_wc, perm, cb) => {
+    cb(['media', 'camera', 'microphone', 'display-capture'].includes(perm));
+  });
+
   buildMenu();
 
   try {
     await startServer();
     await waitForServer();
   } catch (err) {
-    console.error('Failed to start embedded server:', err);
-    // Show error and quit
-    const { dialog } = require('electron');
     dialog.showErrorBox(
-      'MoCap Studio – Server Error',
-      `Could not start the embedded server:\n\n${err.message}\n\nThe application will now close.`
+      'MoCap Studio – Startup Error',
+      `Failed to start the embedded server:\n\n${err.message}\n\nThe application will close.`
     );
     app.quit();
     return;
@@ -195,13 +222,4 @@ app.whenReady().then(async () => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
-});
-
-// Permit camera/mic access in the Electron permission handler
-app.on('ready', () => {
-  const { session } = require('electron');
-  session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
-    const allowed = ['media', 'camera', 'microphone', 'display-capture'];
-    callback(allowed.includes(permission));
-  });
 });
