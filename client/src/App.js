@@ -1,143 +1,53 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import PhotoUpload from './components/PhotoUpload';
-import ModelUpload from './components/ModelUpload';
-import MotionUpload from './components/MotionUpload';
-import DefaultModels from './components/DefaultModels';
-import ModelsList from './components/ModelsList';
-import Features from './components/Features';
-import './index.css';
+import React, { useState } from 'react';
+import LiveCapture from './components/LiveCapture';
+import InfoPanel from './components/InfoPanel';
+import './App.css';
 
-const API_BASE = process.env.REACT_APP_API_BASE || '/api';
+const TABS = [
+  { id: 'capture', label: 'Live Capture', icon: '🎬' },
+  { id: 'guide',   label: 'Setup Guide',  icon: '📖' }
+];
 
-function App() {
-  const [activeTab, setActiveTab] = useState('photo');
-  const [models, setModels] = useState([]);
-  const [defaultModels, setDefaultModels] = useState([]);
-
-  useEffect(() => {
-    fetchModels();
-    fetchDefaultModels();
-  }, []);
-
-  const fetchModels = async () => {
-    try {
-      const response = await axios.get(`${API_BASE}/models`);
-      setModels(response.data);
-    } catch (error) {
-      console.error('Error fetching models:', error);
-    }
-  };
-
-  const fetchDefaultModels = async () => {
-    try {
-      const response = await axios.get(`${API_BASE}/default-models`);
-      setDefaultModels(response.data);
-    } catch (error) {
-      console.error('Error fetching default models:', error);
-    }
-  };
-
-  const handlePhotoConverted = () => {
-    fetchModels();
-  };
-
-  const handleModelUploaded = () => {
-    fetchModels();
-  };
+export default function App() {
+  const [tab, setTab] = useState('capture');
 
   return (
-    <div className="App">
+    <div className="app">
+      {/* ── Header ── */}
       <header className="header">
-        <div className="header-content">
+        <div className="header-inner">
           <div className="logo">
-            <div className="logo-icon">🎯</div>
+            <span className="logo-icon">🎭</span>
             <div>
-              <h1>EyeTrain1</h1>
-              <p className="tagline">Professional 3D Model Platform</p>
+              <div className="logo-title">MoCap Studio</div>
+              <div className="logo-sub">Webcam · Kinect v1 · Kinect v2</div>
             </div>
           </div>
           <nav className="nav">
-            <a href="#features" className="nav-link">Features</a>
-            <a href="#models" className="nav-link">Models</a>
-            <a href="#about" className="nav-link">About</a>
+            {TABS.map(t => (
+              <button
+                key={t.id}
+                className={`nav-btn${tab === t.id ? ' active' : ''}`}
+                onClick={() => setTab(t.id)}
+              >
+                <span>{t.icon}</span> {t.label}
+              </button>
+            ))}
           </nav>
         </div>
       </header>
 
-      <main className="container">
-        <section className="hero">
-          <h2>Transform Photos to 3D Models</h2>
-          <p>
-            Upload photos to create stunning 3D models, automatically rig humanoid characters,
-            and apply motion capture for professional animations. Powered by AI, inspired by
-            Meshy AI and DeepMotion.
-          </p>
-        </section>
-
-        <div className="tabs">
-          <button
-            className={`tab-button ${activeTab === 'photo' ? 'active' : ''}`}
-            onClick={() => setActiveTab('photo')}
-          >
-            📸 Photo to 3D
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'upload' ? 'active' : ''}`}
-            onClick={() => setActiveTab('upload')}
-          >
-            📦 Upload Model
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'motion' ? 'active' : ''}`}
-            onClick={() => setActiveTab('motion')}
-          >
-            🎬 Motion Capture
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'defaults' ? 'active' : ''}`}
-            onClick={() => setActiveTab('defaults')}
-          >
-            🎮 Unreal Models
-          </button>
-        </div>
-
-        <div className="tab-content">
-          {activeTab === 'photo' && (
-            <PhotoUpload onConverted={handlePhotoConverted} apiBase={API_BASE} />
-          )}
-          {activeTab === 'upload' && (
-            <ModelUpload onUploaded={handleModelUploaded} apiBase={API_BASE} />
-          )}
-          {activeTab === 'motion' && (
-            <MotionUpload models={models} apiBase={API_BASE} />
-          )}
-          {activeTab === 'defaults' && (
-            <DefaultModels models={defaultModels} />
-          )}
-        </div>
-
-        <section id="models">
-          <ModelsList models={models} onRefresh={fetchModels} />
-        </section>
-
-        <Features />
+      {/* ── Main ── */}
+      <main className="main">
+        {tab === 'capture' && <LiveCapture />}
+        {tab === 'guide'   && <InfoPanel />}
       </main>
 
-      <footer style={{ 
-        textAlign: 'center', 
-        padding: '2rem', 
-        opacity: 0.8,
-        borderTop: '1px solid rgba(255,255,255,0.1)',
-        marginTop: '4rem'
-      }}>
-        <p>© 2024 EyeTrain1. Professional 3D Model Platform.</p>
-        <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>
-          Inspired by Meshy AI and DeepMotion
-        </p>
+      {/* ── Footer ── */}
+      <footer className="footer">
+        <p>MoCap Studio — Open-source motion capture · Inspired by iPi Soft</p>
+        <p className="footer-sub">MediaPipe Pose · Kinect SDK 1.8/2.0 · BVH export · Three.js 3D preview</p>
       </footer>
     </div>
   );
 }
-
-export default App;

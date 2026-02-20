@@ -1,0 +1,9 @@
+# Kinect v1 (Windows only)
+pykinect
+
+# Kinect v2 (Windows only)
+pykinect2
+comtypes
+
+# WebSocket client (required for both)
+websocket-client>=1.6.0

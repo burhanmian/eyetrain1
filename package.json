@@ -1,32 +1,24 @@
 {
-  "name": "eyetrain1",
+  "name": "mocap-studio",
   "version": "1.0.0",
-  "description": "Professional photo to 3D model application with rigging and motion capture",
+  "description": "Professional motion capture from webcam, Kinect v1 and Kinect v2",
   "main": "server/index.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "node server/index.js",
+    "server": "nodemon server/index.js",
     "client": "cd client && npm start",
     "build": "cd client && npm run build",
-    "install-all": "npm install && cd client && npm install",
-    "test": "echo \"Tests coming soon\" && exit 0"
+    "start": "node server/index.js",
+    "install-all": "npm install && cd client && npm install"
   },
-  "keywords": [
-    "3d",
-    "model",
-    "rigging",
-    "mocap",
-    "animation",
-    "unreal"
-  ],
-  "author": "",
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "multer": "^2.0.2",
-    "uuid": "^9.0.0"
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.0",
+    "ws": "^8.16.0"
   },
   "devDependencies": {
     "concurrently": "^8.2.1",

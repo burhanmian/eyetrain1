@@ -1,298 +1,153 @@
-# 🎯 EyeTrain1 - Professional Photo to 3D Model Platform
+# MoCap Studio
 
-**✅ STATUS: FULLY WORKING & READY TO USE**
-
-A comprehensive web application for converting photos to 3D models with automatic rigging and motion capture capabilities. Inspired by **Meshy AI** and **DeepMotion**.
-
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Status](https://img.shields.io/badge/status-working-brightgreen)
-![Security](https://img.shields.io/badge/vulnerabilities-0-brightgreen)
-
-**[See Live Screenshot](https://github.com/user-attachments/assets/831d584d-e9b1-4081-8a55-3a451961cbd7)**
-
-## ✨ Features
-
-### 📸 Photo to 3D Conversion
-- Upload photos and convert them to high-quality 3D models
-- AI-powered conversion with progress tracking
-- Support for multiple image formats (JPEG, PNG, GIF, BMP)
-
-### 🤖 Automatic Humanoid Rigging
-- Intelligent humanoid detection
-- Automatic skeletal rigging for detected humanoids
-- UE4/UE5 compatible skeleton (67 bones)
-- Support for standard rig formats
-
-### 🎬 Motion Capture Integration
-- Upload BVH and FBX motion capture data
-- Apply animations to rigged models
-- Motion retargeting and validation
-- Preview animations in real-time
-
-### 🎮 Default Unreal Engine Models
-- Pre-rigged UE Mannequin
-- Male and female character bases
-- Full UE4/UE5 skeleton compatibility
-- Ready for game development
-
-### 💾 Export & Share
-- Multiple export formats (FBX, OBJ, GLTF, GLB, DAE)
-- Export with animations
-- Download ready-to-use assets
-
-## 🚀 Quick Start (3 Steps)
-
-```bash
-# 1. Install dependencies
-npm install && cd client && npm install && cd ..
-
-# 2. Build frontend
-cd client && npm run build && cd ..
-
-# 3. Start server
-node server/index.js
-```
-
-Then open **http://localhost:5000** in your browser! 🎉
+Professional motion capture from **webcam**, **Kinect v1**, and **Kinect v2**.
+Inspired by [iPi Soft](https://www.ipisoft.com/) — off-the-shelf cameras, full-body tracking, BVH export.
 
 ---
 
-## 📖 Getting Started
+## Features
 
-### Prerequisites
-- Node.js 14+ and npm
-- Modern web browser
-- At least 2GB free disk space
+| Feature | Webcam | Kinect v1 | Kinect v2 |
+|---|---|---|---|
+| Full-body tracking | MediaPipe Pose (33 pts) | 20 joints | 25 joints |
+| Depth sensor | No | Yes | Yes (HD) |
+| OS requirement | Any (browser) | Windows | Windows |
+| Real-time 3D preview | Yes | Yes | Yes |
+| BVH export | Yes | Yes | Yes |
+| JSON export | Yes | Yes | Yes |
+| Recording sessions | Yes | Yes | Yes |
 
-### Installation
+---
 
-1. **Clone the repository**
+## Quick Start
+
+### 1. Install dependencies
+
 ```bash
-git clone https://github.com/burhanmian/eyetrain1.git
-cd eyetrain1
+npm run install-all
 ```
 
-2. **Install dependencies**
+### 2. Start the server
+
 ```bash
-npm install
-cd client && npm install && cd ..
+npm start
 ```
 
-3. **Set up environment variables**
+Open **http://localhost:5000**
+
+### 3. For development (hot reload)
+
 ```bash
-cp .env.example .env
-```
-
-Edit `.env` file with your configuration:
-```
-PORT=5000
-NODE_ENV=development
-UPLOAD_DIR=./uploads
-MODELS_DIR=./models
-MAX_FILE_SIZE=50
-```
-
-4. **Start the application**
-```bash
-# Development mode (runs both frontend and backend)
 npm run dev
-
-# Or run separately:
-# Backend server
-npm run server
-
-# Frontend client (in another terminal)
-npm run client
 ```
-
-5. **Open in browser**
-```
-http://localhost:3000
-```
-
-## 📖 Usage Guide
-
-### Converting Photos to 3D Models
-
-1. Navigate to the **Photo to 3D** tab
-2. Drag and drop a photo or click to select one
-3. Wait for the conversion process to complete
-4. View your generated 3D model in the Models section
-
-### Uploading 3D Models
-
-1. Go to the **Upload Model** tab
-2. Upload your FBX, OBJ, GLTF, GLB, or DAE file
-3. The system will automatically detect if it's humanoid
-4. Humanoid models will be automatically rigged
-
-### Applying Motion Capture
-
-1. Open the **Motion Capture** tab
-2. Select a rigged model from the dropdown
-3. Upload your BVH or FBX motion data
-4. The animation will be applied to your model
-5. Preview or export the animated model
-
-### Using Default Unreal Models
-
-1. Visit the **Unreal Models** tab
-2. Browse available pre-rigged models
-3. Select a model to use as a base
-4. Apply motion capture or customize as needed
-
-## 🏗️ Architecture
-
-### Backend (Node.js + Express)
-- RESTful API for all operations
-- File upload handling with Multer
-- In-memory job tracking
-- Modular service architecture
-
-### Frontend (React)
-- Modern, responsive UI
-- Component-based architecture
-- Real-time upload progress
-- Interactive 3D preview (Three.js ready)
-
-### Directory Structure
-```
-eyetrain1/
-├── server/
-│   └── index.js          # Express server & API
-├── client/
-│   ├── public/           # Static assets
-│   └── src/
-│       ├── components/   # React components
-│       ├── App.js        # Main application
-│       └── index.css     # Styles
-├── uploads/              # Uploaded photos
-├── models/               # Generated 3D models
-│   └── default-unreal/   # Default UE models
-├── package.json          # Root dependencies
-└── README.md
-```
-
-## 🛠️ API Endpoints
-
-### Photo Conversion
-- `POST /api/upload-photo` - Upload photo for conversion
-- `GET /api/job/:jobId` - Get conversion job status
-
-### Model Management
-- `POST /api/upload-model` - Upload 3D model
-- `GET /api/model/:modelId` - Get model details
-- `GET /api/models` - List all user models
-- `GET /api/default-models` - Get default Unreal models
-
-### Motion Capture
-- `POST /api/upload-motion` - Upload motion data
-- `GET /api/motion/:motionId` - Get motion details
-- `GET /api/model/:modelId/motions` - List motions for model
-
-### Export
-- `POST /api/export` - Export model with animation
-
-## 🎨 Technologies Used
-
-### Backend
-- **Express.js** - Web framework
-- **Multer** - File upload handling
-- **CORS** - Cross-origin resource sharing
-- **UUID** - Unique ID generation
-
-### Frontend
-- **React** - UI framework
-- **Axios** - HTTP client
-- **React Dropzone** - File upload interface
-- **Three.js** - 3D rendering (via @react-three/fiber)
-
-## 🔮 Future Enhancements & Development
-
-The platform is designed for easy extension. **Comprehensive guides available:**
-
-### 📚 Development Documentation
-- **[ENHANCEMENTS.md](ENHANCEMENTS.md)** - 30+ Feature Ideas with Implementation Guides
-  - Quick wins (easy to implement)
-  - AI & ML features
-  - 3D viewer enhancements
-  - Advanced rigging tools
-  - Motion capture improvements
-  - Cloud & storage integrations
-  - User management & collaboration
-  - Professional tools
-
-- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Complete Developer Guide
-  - Setup instructions
-  - Project structure explained
-  - Step-by-step tutorials
-  - Common development tasks
-
-- **[ROADMAP.md](ROADMAP.md)** - Development Timeline
-  - Version 1.1: Foundation enhancements
-  - Version 1.2: AI integration
-  - Version 1.3: Advanced 3D features
-  - Version 1.4: Motion capture enhancement
-  - Version 2.0: Enterprise edition
-
-- **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Quick Developer Reference
-  - Common commands
-  - Code patterns
-  - Debugging tips
-  - Best practices
-
-### 🎯 Planned Core Features
-- [ ] Real AI-powered photo-to-3D conversion
-- [ ] Advanced rigging algorithms
-- [ ] Real-time 3D preview with Three.js
-- [ ] Cloud storage integration (S3, GCS, Azure)
-- [ ] User authentication and accounts
-- [ ] Collaborative features
-- [ ] Animation timeline editor
-- [ ] Physics simulation
-- [ ] Texture editing tools
-- [ ] Batch processing
-- [ ] Plugin system for custom exporters
-
-**Want to contribute?** Start with [GETTING_STARTED.md](GETTING_STARTED.md) and pick a feature from [ENHANCEMENTS.md](ENHANCEMENTS.md)!
-
-## 🤝 Contributing
-
-Contributions are welcome! Please see:
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
-- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Development setup
-- **[ENHANCEMENTS.md](ENHANCEMENTS.md)** - Feature ideas to implement
-
-## 📚 Complete Documentation
-
-All documentation files:
-- **[README.md](README.md)** - Main documentation (this file)
-- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Developer onboarding guide
-- **[ENHANCEMENTS.md](ENHANCEMENTS.md)** - 30+ enhancement ideas
-- **[ROADMAP.md](ROADMAP.md)** - Development timeline and planning
-- **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Quick reference for developers
-- **[API.md](API.md)** - Complete API reference
-- **[USER_GUIDE.md](USER_GUIDE.md)** - User tutorials and guides
-- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Deployment instructions
-- **[SECURITY.md](SECURITY.md)** - Security considerations
-- **[TESTING.md](TESTING.md)** - Testing strategy
-- **[STATUS.md](STATUS.md)** - Current status and verification
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 🙏 Acknowledgments
-
-- Inspired by [Meshy AI](https://www.meshy.ai/) - Photo to 3D conversion
-- Inspired by [DeepMotion](https://www.deepmotion.com/) - Motion capture technology
-- Unreal Engine for skeletal standards
-
-## 📧 Support
-
-For support, please open an issue in the GitHub repository.
 
 ---
 
-**Built with ❤️ for the 3D artist community**
+## Kinect Setup (Windows only)
+
+### Kinect v1
+
+1. Install [Kinect SDK 1.8](https://www.microsoft.com/en-us/download/details.aspx?id=40278)
+2. Plug in Kinect v1 sensor
+3. Install Python bridge dependencies:
+   ```
+   pip install pykinect websocket-client
+   ```
+4. Run the bridge:
+   ```
+   python bridge/kinect_bridge.py --device 1
+   ```
+
+### Kinect v2
+
+1. Install [Kinect for Windows SDK 2.0](https://www.microsoft.com/en-us/download/details.aspx?id=44561)
+2. Plug in Kinect v2 sensor via **USB 3.0**
+3. Install Python bridge dependencies:
+   ```
+   pip install pykinect2 comtypes websocket-client
+   ```
+4. Run the bridge:
+   ```
+   python bridge/kinect_bridge.py --device 2
+   ```
+
+### Test without hardware (simulation mode)
+
+```bash
+python bridge/kinect_bridge.py --device 2 --simulate
+```
+
+---
+
+## Project Structure
+
+```
+mocap-studio/
+├── server/
+│   └── index.js          # Express API + WebSocket server
+├── client/
+│   └── src/
+│       ├── App.js
+│       ├── components/
+│       │   ├── LiveCapture.js      # Main capture UI
+│       │   ├── SkeletonOverlay.js  # 2D canvas overlay
+│       │   ├── Skeleton3DViewer.js # Three.js 3D view
+│       │   └── InfoPanel.js        # Setup guide
+│       └── utils/
+│           ├── PoseDetector.js     # MediaPipe wrapper
+│           ├── KinectMapper.js     # Kinect joint normaliser
+│           └── BVHExporter.js      # BVH/JSON exporter
+├── bridge/
+│   ├── kinect_bridge.py  # Python Kinect bridge
+│   └── requirements.txt
+└── package.json
+```
+
+---
+
+## API Reference
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/health` | Server status + WS info |
+| GET | `/api/recordings` | List saved recordings |
+| POST | `/api/recordings` | Save a recording from browser |
+| GET | `/api/recordings/:id` | Get recording with frames |
+| DELETE | `/api/recordings/:id` | Delete recording |
+| GET | `/api/recordings/:id/bvh` | Download as BVH |
+| GET | `/api/recordings/:id/json` | Download as JSON |
+
+### WebSocket (`ws://localhost:5001`)
+
+**Browser client** connects with `?role=browser`.
+**Kinect bridge** connects with `?role=kinect-bridge&device=kinect2`.
+
+Messages: `session:start` / `frame` / `session:stop` / `bridge:hello`
+
+---
+
+## Export Formats
+
+### BVH (BioVision Hierarchy)
+Standard motion capture format. Compatible with:
+- Blender, Maya, 3ds Max, MotionBuilder
+- Unity, Unreal Engine
+- iPi Mocap Studio, iClone
+
+### JSON
+Raw joint data: `{ fps, frames: [{ t, joints: { name: {x,y,z,rx,ry,rz} } }] }`
+
+---
+
+## Technology Stack
+
+- **Frontend**: React 18, Three.js, @react-three/fiber, @react-three/drei
+- **Pose AI**: MediaPipe Pose (Google) — runs in browser, no server calls
+- **Backend**: Node.js, Express, WebSocket (ws)
+- **Kinect bridge**: Python, pykinect / pykinect2, websocket-client
+
+---
+
+## License
+
+MIT
