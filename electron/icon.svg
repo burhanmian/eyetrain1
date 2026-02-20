@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <rect width="256" height="256" rx="40" fill="#0a0a1a"/>
+  <!-- Body skeleton -->
+  <circle cx="128" cy="60" r="18" fill="#00ccff" opacity="0.9"/>
+  <line x1="128" y1="78" x2="128" y2="140" stroke="#00ff88" stroke-width="5" stroke-linecap="round"/>
+  <!-- Arms -->
+  <line x1="128" y1="100" x2="80" y2="125" stroke="#00ff88" stroke-width="5" stroke-linecap="round"/>
+  <line x1="128" y1="100" x2="176" y2="125" stroke="#00ff88" stroke-width="5" stroke-linecap="round"/>
+  <line x1="80" y1="125" x2="60" y2="155" stroke="#00ff88" stroke-width="4" stroke-linecap="round"/>
+  <line x1="176" y1="125" x2="196" y2="155" stroke="#00ff88" stroke-width="4" stroke-linecap="round"/>
+  <!-- Legs -->
+  <line x1="128" y1="140" x2="105" y2="185" stroke="#00ff88" stroke-width="5" stroke-linecap="round"/>
+  <line x1="128" y1="140" x2="151" y2="185" stroke="#00ff88" stroke-width="5" stroke-linecap="round"/>
+  <line x1="105" y1="185" x2="95" y2="220" stroke="#00ff88" stroke-width="4" stroke-linecap="round"/>
+  <line x1="151" y1="185" x2="161" y2="220" stroke="#00ff88" stroke-width="4" stroke-linecap="round"/>
+  <!-- Joints -->
+  <circle cx="80" cy="125" r="5" fill="#00ccff"/>
+  <circle cx="176" cy="125" r="5" fill="#00ccff"/>
+  <circle cx="60" cy="155" r="5" fill="#00ccff"/>
+  <circle cx="196" cy="155" r="5" fill="#00ccff"/>
+  <circle cx="128" cy="140" r="6" fill="#00ccff"/>
+  <circle cx="105" cy="185" r="5" fill="#00ccff"/>
+  <circle cx="151" cy="185" r="5" fill="#00ccff"/>
+  <circle cx="95" cy="220" r="5" fill="#00ccff"/>
+  <circle cx="161" cy="220" r="5" fill="#00ccff"/>
+  <!-- Camera ring around head -->
+  <circle cx="128" cy="60" r="26" fill="none" stroke="#cc44ff" stroke-width="2" opacity="0.6" stroke-dasharray="4 4"/>
+</svg>

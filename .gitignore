@@ -5,3 +5,10 @@ client/build/
 recordings/
 uploads/
 *.log
+
+# Electron build output
+dist/
+out/
+electron/icon.png
+.cache/
+
